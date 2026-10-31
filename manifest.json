@@ -1,0 +1,25 @@
+{
+  "name": "AquaPulse — Minimalist Water Intake Tracker",
+  "short_name": "AquaPulse",
+  "description": "Minimalist, privacy-first water intake tracker and hydration logger with full time/day data table.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#050b14",
+  "theme_color": "#07111f",
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

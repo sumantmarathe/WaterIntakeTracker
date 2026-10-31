@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#07111f" />
+  <meta name="description" content="AquaPulse — Minimalist, privacy-first water intake tracker and hydration data logger." />
+  <title>AquaPulse — Minimalist Water Intake Tracker</title>
+
+  <link rel="manifest" href="./manifest.json" />
+  <link rel="icon" type="image/png" sizes="192x192" href="./icons/icon-192.png" />
+  <link rel="apple-touch-icon" href="./icons/icon-192.png" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="./css/style.css" />
+</head>
+<body>
+  <div class="ambient-glow ambient-glow-1" aria-hidden="true"></div>
+  <div class="ambient-glow ambient-glow-2" aria-hidden="true"></div>
+
+  <div class="app-shell">
+    <!-- Top Brand & Utility Header -->
+    <header class="top-header">
+      <div class="brand-group">
+        <div class="brand-logo" aria-hidden="true">
+          <svg viewBox="0 0 32 32" width="24" height="24" fill="none">
+            <path d="M16 3C16 3 6 14.2 6 20.5C6 26.0228 10.4772 30.5 16 30.5C21.5228 30.5 26 26.0228 26 20.5C26 14.2 16 3 16 3Z" fill="url(#dropGrad)" />
+            <path d="M12 21.5C12 23.7 13.8 25.5 16 25.5" stroke="rgba(255,255,255,0.65)" stroke-width="2" stroke-linecap="round" />
+            <defs>
+              <linearGradient id="dropGrad" x1="6" y1="3" x2="26" y2="30.5" gradientUnits="userSpaceOnUse">
+                <stop stop-color="#38bdf8" />
+                <stop offset="1" stop-color="#06b6d4" />
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <h1 class="brand-title">AquaPulse</h1>
+          <span class="brand-subtitle">Hydration Tracker</span>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <button type="button" id="btn-install-pwa" class="btn-icon-pill hidden" title="Install App">
+          <svg viewBox="0 0 20 20" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M10 3v10m0 0l-3.5-3.5M10 13l3.5-3.5M4 16h12" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <span class="label-desktop">Install App</span>
+          <span class="label-mobile">Install</span>
+        </button>
+
+        <button type="button" id="btn-open-goal-modal" class="btn-icon-pill" title="Adjust Daily Hydration Goal">
+          <svg viewBox="0 0 20 20" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8">
+            <circle cx="10" cy="10" r="7" />
+            <circle cx="10" cy="10" r="3" />
+          </svg>
+          <span class="label-desktop">Goal: <strong id="header-goal-label">2,500 ml</strong></span>
+          <span class="label-mobile" id="header-goal-label-mobile">2,500 ml</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Primary Responsive Segmented Navigation (Dual Labels, Zero Wrapping) -->
+    <nav class="segmented-nav" aria-label="Primary Views">
+      <button type="button" id="nav-tab-logger" class="seg-tab active" data-view="logger" aria-selected="true">
+        <svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8">
+          <path d="M10 2.5C10 2.5 4.5 9 4.5 13C4.5 16.0376 6.96243 18.5 10 18.5C13.0376 18.5 15.5 16.0376 15.5 13C15.5 9 10 2.5 10 2.5Z" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span class="label-desktop">Hydration Logger</span>
+        <span class="label-mobile">Logger</span>
+      </button>
+
+      <button type="button" id="nav-tab-history" class="seg-tab" data-view="history" aria-selected="false">
+        <svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8">
+          <rect x="2.5" y="3.5" width="15" height="13" rx="2" />
+          <path d="M2.5 8h15M7.5 8v8.5" stroke-linecap="round"/>
+        </svg>
+        <span class="label-desktop">Data Table &amp; History</span>
+        <span class="label-mobile">Data Table</span>
+        <span id="nav-entry-badge" class="nav-badge">0</span>
+      </button>
+    </nav>
+
+    <!-- =================================================================== -->
+    <!-- VIEW 1: FOCUSED HYDRATION LOGGER (DEFAULT START SCREEN)             -->
+    <!-- =================================================================== -->
+    <main id="view-logger" class="view-panel active" aria-labelledby="nav-tab-logger">
+      <div class="logger-grid">
+        <!-- Hero Progress Dial Card -->
+        <section class="glass-card hero-ring-card" aria-label="Today's Hydration Progress">
+          <div class="hero-card-top">
+            <div>
+              <span class="eyebrow-tag" id="today-date-label">Today</span>
+              <h2 class="section-heading">Daily Hydration</h2>
+            </div>
+            <div class="streak-pill" id="streak-badge" title="Consecutive days meeting daily goal">
+              <span class="streak-icon" aria-hidden="true">💧</span>
+              <span id="streak-count-text">0 Day Streak</span>
+            </div>
+          </div>
+
+          <div class="ring-container">
+            <svg class="progress-ring-svg" viewBox="0 0 220 220" role="img" aria-label="Hydration completion dial">
+              <defs>
+                <linearGradient id="ringGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#38bdf8" />
+                  <stop offset="55%" stop-color="#06b6d4" />
+                  <stop offset="100%" stop-color="#10b981" />
+                </linearGradient>
+              </defs>
+              <circle class="ring-track" cx="110" cy="110" r="92" />
+              <circle id="ring-progress-circle" class="ring-fill" cx="110" cy="110" r="92" stroke="url(#ringGradient)" stroke-dasharray="578.05" stroke-dashoffset="578.05" />
+            </svg>
+
+            <div class="ring-center-content">
+              <span id="ring-percentage-text" class="ring-percent">0%</span>
+              <div class="ring-volume-readout">
+                <strong id="ring-current-ml">0</strong>
+                <span class="ring-goal-divider">/ <span id="ring-goal-ml">2,500</span> ml</span>
+              </div>
+              <span id="ring-status-pill" class="ring-remaining-pill">2,500 ml remaining</span>
+            </div>
+          </div>
+
+          <div class="hero-mini-stats">
+            <div class="mini-stat-box">
+              <span class="mini-stat-label">Drinks Today</span>
+              <strong id="stat-today-count" class="mini-stat-val">0</strong>
+            </div>
+            <div class="mini-stat-box">
+              <span class="mini-stat-label">Last Drink</span>
+              <strong id="stat-last-time" class="mini-stat-val">—</strong>
+            </div>
+            <div class="mini-stat-box">
+              <span class="mini-stat-label">Daily Target</span>
+              <button type="button" id="btn-inline-edit-goal" class="mini-stat-link">
+                <span id="stat-goal-val">2,500 ml</span> ✎
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- Quick Logger & Custom Entry Column -->
+        <div class="logger-controls-col">
+          <!-- 1-Tap Quick-Add Vessels -->
+          <section class="glass-card quick-add-card" aria-label="One-Tap Quick Hydration Logger">
+            <div class="card-header-row">
+              <div>
+                <h2 class="card-title">Quick Log</h2>
+                <p class="card-subtitle">Tap a vessel to log water instantly</p>
+              </div>
+              <button type="button" id="btn-undo-last" class="btn-ghost-sm" disabled title="Remove most recent entry">
+                <svg viewBox="0 0 20 20" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M4 7h8a4 4 0 110 8H7M4 7l3-3M4 7l3 3" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <span>Undo Last</span>
+              </button>
+            </div>
+
+            <div class="vessel-grid">
+              <button type="button" class="vessel-btn" data-preset-ml="150" data-vessel="Small Cup">
+                <div class="vessel-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <path d="M5 7h11v7a4 4 0 01-4 4H9a4 4 0 01-4-4V7z"/>
+                    <path d="M16 8h2a2 2 0 010 4h-2"/>
+                  </svg>
+                </div>
+                <div class="vessel-info">
+                  <strong class="vessel-amount">+150 ml</strong>
+                  <span class="vessel-name">Small Cup</span>
+                </div>
+              </button>
+
+              <button type="button" class="vessel-btn" data-preset-ml="250" data-vessel="Glass">
+                <div class="vessel-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <path d="M6 4h12l-1.5 15a2 2 0 01-2 1.8h-5a2 2 0 01-2-1.8L6 4z"/>
+                    <path d="M6.8 10h10.4"/>
+                  </svg>
+                </div>
+                <div class="vessel-info">
+                  <strong class="vessel-amount">+250 ml</strong>
+                  <span class="vessel-name">Standard Glass</span>
+                </div>
+              </button>
+
+              <button type="button" class="vessel-btn" data-preset-ml="500" data-vessel="Bottle">
+                <div class="vessel-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <path d="M9 2h6v3l2 3v12a2 2 0 01-2 2H9a2 2 0 01-2-2V8l2-3V2z"/>
+                    <path d="M7 13h10"/>
+                  </svg>
+                </div>
+                <div class="vessel-info">
+                  <strong class="vessel-amount">+500 ml</strong>
+                  <span class="vessel-name">Water Bottle</span>
+                </div>
+              </button>
+
+              <button type="button" class="vessel-btn" data-preset-ml="750" data-vessel="Sports Flask">
+                <div class="vessel-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <path d="M8 2h8v2H8V2zm1 2h6l2 4v12a2 2 0 01-2 2H9a2 2 0 01-2-2V8l2-4z"/>
+                    <path d="M10 11h4m-4 4h4"/>
+                  </svg>
+                </div>
+                <div class="vessel-info">
+                  <strong class="vessel-amount">+750 ml</strong>
+                  <span class="vessel-name">Sports Flask</span>
+                </div>
+              </button>
+            </div>
+          </section>
+
+          <!-- Custom Hydration Entry Form -->
+          <section class="glass-card custom-entry-card" aria-label="Custom Hydration Logger">
+            <h2 class="card-title">Custom Intake Entry</h2>
+            <form id="custom-entry-form" class="custom-form" novalidate>
+              <div class="form-row-2">
+                <div class="form-field">
+                  <label for="input-amount-ml">Volume (ml)</label>
+                  <input type="number" id="input-amount-ml" min="1" max="5000" step="10" placeholder="e.g. 300" required />
+                </div>
+                <div class="form-field">
+                  <label for="input-beverage-type">Beverage</label>
+                  <select id="input-beverage-type">
+                    <option value="water">Pure Water</option>
+                    <option value="sparkling">Sparkling Water</option>
+                    <option value="electrolyte">Electrolyte Mix</option>
+                    <option value="tea">Herbal Tea</option>
+                    <option value="coconut">Coconut Water</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-row-3">
+                <div class="form-field">
+                  <label for="input-date">Date</label>
+                  <input type="date" id="input-date" required />
+                </div>
+                <div class="form-field">
+                  <label for="input-time">Time</label>
+                  <input type="time" id="input-time" required />
+                </div>
+                <div class="form-field">
+                  <label for="input-note">Note (Optional)</label>
+                  <input type="text" id="input-note" maxlength="80" placeholder="e.g. Post-workout" />
+                </div>
+              </div>
+
+              <button type="submit" id="btn-submit-custom" class="btn-primary-full">
+                <span>+ Log Hydration Entry</span>
+              </button>
+            </form>
+          </section>
+        </div>
+      </div>
+
+      <!-- Compact Today Preview & Prominent Link to Full Water Intake Data Table -->
+      <section class="glass-card table-bridge-card" aria-label="Today's Recent Activity and Data Table Link">
+        <div class="bridge-top-row">
+          <div>
+            <h3 class="card-title">Today's Recent Logs</h3>
+            <p class="card-subtitle" id="recent-preview-subtitle">Your latest entries today appear here</p>
+          </div>
+          <div id="recent-pills-container" class="recent-pills-list">
+            <!-- Populated dynamically with up to 3 recent chips -->
+          </div>
+        </div>
+
+        <div class="bridge-cta-row">
+          <button type="button" id="btn-link-to-table" class="btn-table-bridge">
+            <div class="bridge-btn-left">
+              <div class="bridge-icon-box" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="3" y="4" width="18" height="16" rx="2"/>
+                  <path d="M3 10h18M9 10v10"/>
+                </svg>
+              </div>
+              <div class="bridge-btn-copy">
+                <strong>View Full Water Intake Data Table</strong>
+                <span id="bridge-record-summary">Inspect complete time &amp; day logs, 7-day chart, and filters</span>
+              </div>
+            </div>
+            <span class="bridge-arrow" aria-hidden="true">→</span>
+          </button>
+        </div>
+      </section>
+    </main>
+
+    <!-- =================================================================== -->
+    <!-- VIEW 2: WATER INTAKE DATA TABLE & ANALYTICS HISTORY                 -->
+    <!-- =================================================================== -->
+    <section id="view-history" class="view-panel hidden" aria-labelledby="nav-tab-history">
+      <!-- Top Action Bar with Back to Logger -->
+      <div class="history-top-bar">
+        <button type="button" id="btn-back-to-logger" class="btn-secondary-pill">
+          <span>← Back to Hydration Logger</span>
+        </button>
+
+        <div class="data-portability-actions">
+          <button type="button" id="btn-export-backup" class="btn-ghost-sm" title="Download JSON Backup">
+            <span>Export JSON</span>
+          </button>
+          <label for="input-import-backup" class="btn-ghost-sm file-label-btn" title="Restore from JSON Backup">
+            <span>Import JSON</span>
+            <input type="file" id="input-import-backup" accept=".json,application/json" class="sr-only" />
+          </label>
+          <button type="button" id="btn-open-purge-modal" class="btn-danger-sm" title="Clear All Data">
+            <span>Clear All</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Summary KPI Strip -->
+      <div class="kpi-strip">
+        <div class="glass-card kpi-card">
+          <span class="kpi-label">Filtered Volume</span>
+          <strong id="kpi-total-volume" class="kpi-value">0 ml</strong>
+        </div>
+        <div class="glass-card kpi-card">
+          <span class="kpi-label">Daily Average</span>
+          <strong id="kpi-daily-avg" class="kpi-value">0 ml</strong>
+        </div>
+        <div class="glass-card kpi-card">
+          <span class="kpi-label">Goal Met Days</span>
+          <strong id="kpi-goal-days" class="kpi-value">0 days</strong>
+        </div>
+        <div class="glass-card kpi-card">
+          <span class="kpi-label">Logged Entries</span>
+          <strong id="kpi-entry-count" class="kpi-value">0</strong>
+        </div>
+      </div>
+
+      <!-- 7-Day Hydration Trend Bar Chart -->
+      <section class="glass-card trend-chart-card" aria-label="Last 7 Days Hydration Chart">
+        <div class="card-header-row">
+          <div>
+            <h2 class="card-title">Last 7 Days Hydration Trend</h2>
+            <p class="card-subtitle">Daily intake volume vs. target goal (<span id="chart-goal-indicator">2,500 ml</span>)</p>
+          </div>
+        </div>
+        <div id="trend-chart-bars" class="trend-bars-grid">
+          <!-- Dynamically rendered 7 day bars -->
+        </div>
+      </section>
+
+      <!-- Filter & Search Controls -->
+      <section class="glass-card filter-bar-card" aria-label="Filter Water Intake Data Table">
+        <div class="filter-controls-grid">
+          <div class="form-field">
+            <label for="filter-range-type">Date Period</label>
+            <select id="filter-range-type">
+              <option value="all">All Time</option>
+              <option value="today">Today Only</option>
+              <option value="7days">Last 7 Days</option>
+              <option value="month">This Month</option>
+              <option value="custom">Specific Date...</option>
+            </select>
+          </div>
+
+          <div id="filter-custom-date-wrap" class="form-field hidden">
+            <label for="filter-custom-date">Select Date</label>
+            <input type="date" id="filter-custom-date" />
+          </div>
+
+          <div class="form-field">
+            <label for="filter-beverage-type">Beverage Type</label>
+            <select id="filter-beverage-type">
+              <option value="all">All Beverages</option>
+              <option value="water">Pure Water</option>
+              <option value="sparkling">Sparkling Water</option>
+              <option value="electrolyte">Electrolyte Mix</option>
+              <option value="tea">Herbal Tea</option>
+              <option value="coconut">Coconut Water</option>
+            </select>
+          </div>
+
+          <div class="form-field">
+            <label for="filter-search-query">Search Logs</label>
+            <input type="search" id="filter-search-query" placeholder="Search vessel, note, date, ml..." />
+          </div>
+        </div>
+      </section>
+
+      <!-- Daily Rollup Summary Table (Intake Per Day) -->
+      <section class="glass-card data-table-card" aria-label="Daily Hydration Summary Table">
+        <div class="card-header-row">
+          <div>
+            <h2 class="card-title">Daily Hydration Rollup (Per Day)</h2>
+            <p class="card-subtitle">Aggregated water intake and goal completion by calendar date</p>
+          </div>
+        </div>
+        <div class="table-responsive">
+          <table class="aqua-table" id="daily-rollup-table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Drinks Logged</th>
+                <th>Total Intake</th>
+                <th>Daily Goal</th>
+                <th>Completion</th>
+              </tr>
+            </thead>
+            <tbody id="daily-rollup-tbody">
+              <!-- Populated dynamically -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Granular Time/Day Water Intake Data Table -->
+      <section class="glass-card data-table-card" aria-label="Detailed Water Intake Data Table per Time and Day">
+        <div class="card-header-row">
+          <div>
+            <h2 class="card-title">Water Intake Data Table (Per Time &amp; Day)</h2>
+            <p class="card-subtitle">Complete chronological log of every hydration entry</p>
+          </div>
+        </div>
+
+        <div class="table-responsive">
+          <table class="aqua-table" id="water-intake-table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Time</th>
+                <th>Beverage</th>
+                <th>Vessel / Note</th>
+                <th>Volume</th>
+                <th>% of Goal</th>
+                <th class="text-right">Action</th>
+              </tr>
+            </thead>
+            <tbody id="water-intake-tbody">
+              <!-- Populated dynamically -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </section>
+
+    <!-- App Footer -->
+    <footer class="app-footer">
+      <span>AquaPulse v1.0.0 • 100% Local-First Privacy</span>
+      <span class="footer-dot">•</span>
+      <a href="./privacy.html" class="footer-link">Privacy Policy</a>
+    </footer>
+  </div>
+
+  <!-- =================================================================== -->
+  <!-- MODAL 1: DAILY GOAL CUSTOMIZATION                                   -->
+  <!-- =================================================================== -->
+  <div id="modal-goal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="modal-goal-title">
+    <div class="glass-card modal-box">
+      <div class="modal-header">
+        <h3 id="modal-goal-title" class="card-title">Daily Hydration Target</h3>
+        <button type="button" id="btn-close-goal-modal" class="btn-close-x" aria-label="Close">✕</button>
+      </div>
+      <p class="modal-desc">Choose a recommended daily intake target or enter a custom goal (500 ml – 10,000 ml).</p>
+
+      <div class="goal-preset-chips">
+        <button type="button" class="goal-chip" data-goal="2000">2,000 ml</button>
+        <button type="button" class="goal-chip" data-goal="2500">2,500 ml</button>
+        <button type="button" class="goal-chip" data-goal="3000">3,000 ml</button>
+        <button type="button" class="goal-chip" data-goal="3500">3,500 ml</button>
+      </div>
+
+      <form id="form-goal-settings">
+        <div class="form-field">
+          <label for="input-goal-ml">Daily Target (ml)</label>
+          <input type="number" id="input-goal-ml" min="500" max="10000" step="50" value="2500" required />
+        </div>
+        <div class="modal-actions">
+          <button type="button" id="btn-cancel-goal" class="btn-ghost-sm">Cancel</button>
+          <button type="submit" class="btn-primary-sm">Save Target</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- =================================================================== -->
+  <!-- MODAL 2: SAFE PURGE CONFIRMATION                                    -->
+  <!-- =================================================================== -->
+  <div id="modal-purge" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="modal-purge-title">
+    <div class="glass-card modal-box">
+      <div class="modal-header">
+        <h3 id="modal-purge-title" class="card-title text-danger">Clear All Hydration Logs?</h3>
+        <button type="button" id="btn-close-purge-modal" class="btn-close-x" aria-label="Close">✕</button>
+      </div>
+      <p class="modal-desc">This will permanently remove all logged hydration entries from this device. We recommend exporting a JSON backup first.</p>
+      <div class="modal-actions">
+        <button type="button" id="btn-cancel-purge" class="btn-ghost-sm">Cancel</button>
+        <button type="button" id="btn-confirm-purge" class="btn-danger-solid">Yes, Clear All Data</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Banner -->
+  <div id="toast-container" class="toast-banner hidden" role="status" aria-live="polite"></div>
+
+  <script type="module" src="./js/app.js"></script>
+</body>
+</html>
