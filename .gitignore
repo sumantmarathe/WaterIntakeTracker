@@ -1,0 +1,18 @@
+# Node & Dependencies
+node_modules/
+npm-debug.log*
+
+# Android Build & Local Config
+android/.gradle/
+android/build/
+android/app/build/
+android/local.properties
+android/key.properties
+*.jks
+*.keystore
+
+# OS & Editor
+.DS_Store
+Thumbs.db
+.idea/
+*.iml

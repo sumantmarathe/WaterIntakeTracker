@@ -1,0 +1,10 @@
+{
+  "name": "waterintaketracker",
+  "version": "1.0.0",
+  "description": "WaterIntakeTracker built under High-Assurance V-Cycle Governance Framework",
+  "type": "module",
+  "scripts": {
+    "test": "node --test tests/unit/*.test.mjs tests/integration/*.test.mjs",
+    "build:android": "node scripts/build-android.mjs"
+  }
+}
